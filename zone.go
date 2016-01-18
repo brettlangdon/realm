@@ -51,8 +51,22 @@ func (zone *Zone) Lookup(name string, reqType uint16, reqClass uint16) []dns.RR 
 		var header *dns.RR_Header
 		header = record.Header()
 
-		// Skip this record if the name or class do not match
-		if header.Name != name || (header.Class != reqClass && reqClass != dns.ClassANY) {
+		// Skip this record if the class does not match up
+		if header.Class != reqClass && reqClass != dns.ClassANY {
+			continue
+		}
+
+		// If this record is an SOA then check name against Mbox
+		if header.Rrtype == dns.TypeSOA {
+			var soa *dns.SOA
+			soa = record.(*dns.SOA)
+			if soa.Mbox == name {
+				records = append(records, soa)
+			}
+		}
+
+		// Skip this record if the name does not match
+		if header.Name != name {
 			continue
 		}
 

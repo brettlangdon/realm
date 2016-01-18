@@ -52,9 +52,16 @@ realm --zone ./domain.zone
 
 By default `realm` binds to port `53`, which usually requires root, so you may need to run `sudo realm --zone ./domain.zone`.
 
+You can also specify any number of zone files by providing `--zone` multiple times:
+
+```
+realm --zone ./first.domain.zone --zone ./second.domain.zone
+```
+
 ### Options
 * `--zone, -z` - the file file to load (e.g. `./domain.zone`), this argument is required
     * You may instead specify the environment variable `REALM_ZONE="./domain.zone"`
+    * You may specify `--zone` and `REALM_ZONE` multiple times
 * `--bind, -b` - the `[<host>]:<port>` to bind the server to (e.g. `0.0.0.0:53`), default is `:53`
     * You may instead specify the environment variable `REALM_BIND=":53"`
 * `--help, -h` - show help message

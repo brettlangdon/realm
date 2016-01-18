@@ -18,7 +18,7 @@ To start a server:
 Full command usage:
 
     NAME:
-       realm - A new cli application
+       realm - A simple non-recursive DNS server
 
     USAGE:
        realm [global options] command [command options] [arguments...]

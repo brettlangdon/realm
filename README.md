@@ -1,5 +1,6 @@
 Realm
 =====
+[![GoDoc](https://godoc.org/github.com/brettlangdon/realm?status.svg)](https://godoc.org/github.com/brettlangdon/realm)
 
 A simple non-recursive DNS server written in [go](https://golang.org).
 
@@ -59,4 +60,4 @@ By default `realm` binds to port `53`, which usually requires root, so you may n
 * `--help, -h` - show help message
 * `--version, -v` - show version information
 
-To see the latest command run `realm --help`.
+To see the latest command usage run `realm --help`.

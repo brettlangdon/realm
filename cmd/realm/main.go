@@ -11,6 +11,7 @@ func main() {
 	// Setup our CLI app
 	var app *cli.App = cli.NewApp()
 	app.Name = "realm"
+	app.Usage = "A simple non-recursive DNS server"
 	app.Version = "0.1.0"
 	app.Author = "Brett Langdon"
 	app.Email = "me@brett.is"

@@ -2,41 +2,31 @@ package main
 
 import (
 	"log"
+	"os"
 
+	"github.com/alexflint/go-arg"
 	"github.com/brettlangdon/realm"
-	"github.com/codegangsta/cli"
 )
 
+var args struct {
+	Zones []string `arg:"--zone,positional,help:DNS zone files to serve from this server"`
+	Bind  string   `arg:"help:[<host>]:<port> to bind too"`
+}
+
 func main() {
-	// Setup our CLI app
-	var app *cli.App = cli.NewApp()
-	app.Name = "realm"
-	app.Usage = "A simple non-recursive DNS server"
-	app.Version = "0.1.0"
-	app.Author = "Brett Langdon"
-	app.Email = "me@brett.is"
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:   "zone, z",
-			EnvVar: "REALM_ZONE",
-			Usage:  "location to DNS zone file [required]",
-		},
-		cli.StringFlag{
-			Name:   "bind, b",
-			EnvVar: "REALM_BIND",
-			Value:  ":53",
-			Usage:  "'[<host>]:<port>' to bind too",
-		},
+	args.Bind = ":53"
+	argParser := arg.MustParse(&args)
+
+	if len(args.Zones) == 0 {
+		log.Println("must supply at least 1 zone file to serve")
+		argParser.WriteUsage(os.Stderr)
+		os.Exit(1)
 	}
 
-	// This action is called for all commands
-	app.Action = func(c *cli.Context) {
-		// Ensure that a zone filename was provided
-		var filename string = c.String("zone")
-		if filename == "" {
-			log.Fatal("must supply zone file via \"--zone\" flag or \"REALM_ZONE\" environment variable")
-		}
+	var registry *realm.Registry
+	registry = realm.NewRegistry()
 
+	for _, filename := range args.Zones {
 		// Load and parse the zone file
 		var zone *realm.Zone
 		var err error
@@ -45,14 +35,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// Create and start the server
-		var bind string = c.String("bind")
-		log.Printf("starting the server on \"%s\"\n", bind)
-		var server *realm.Server = realm.NewServer(bind, zone)
-		log.Fatal(server.ListenAndServe())
+		registry.AddZone(zone)
 	}
 
-	// Parse command arguments and run `app.Action`
-	app.RunAndExitOnError()
+	// Create and start the server
+	log.Printf("starting the server on \"%s\"\n", args.Bind)
+	var server *realm.Server = realm.NewServer(args.Bind, registry)
+	log.Fatal(server.ListenAndServe())
 }

@@ -5,6 +5,6 @@ clean:
 	rm -f ./realm
 
 run:
-	go run ./cmd/realm/main.go
+	go run ./cmd/realm/main.go ${ARGS}
 
 .PHONY: clean run

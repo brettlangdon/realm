@@ -13,26 +13,18 @@ Realm will parse your server configuration from a DNS zone file see https://en.w
 
 To start a server:
 
-    realm --zone ./domain.zone
+    realm ./domain.zone
+    realm --bind "127.0.0.1:1053" ./first.domain.zone ./second.domain.zone
 
 Full command usage:
 
-    NAME:
-       realm - A simple non-recursive DNS server
+    usage: realm [--bind BIND] [ZONE [ZONE ...]]
 
-    USAGE:
-       realm [global options] command [command options] [arguments...]
+    positional arguments:
+      zone                   DNS zone files to serve from this server
 
-    VERSION:
-       0.1.0
-
-    COMMANDS:
-       help, h	Shows a list of commands or help for one command
-
-    GLOBAL OPTIONS:
-       --zone, -z 		location to DNS zone file [required] [$REALM_ZONE]
-       --bind, -b ':53'	'[<host>]:<port>' to bind too [$REALM_BIND]
-       --help, -h		show help
-       --version, -v	print the version
+    options:
+      --bind BIND            [<host>]:<port> to bind too [default: :53]
+      --help, -h             display this help and exit
 */
 package realm

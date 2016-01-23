@@ -42,6 +42,7 @@ func ParseZone(filename string) (*Zone, error) {
 	return zone, nil
 }
 
+// Records will retrieve the DNS records for this zone
 func (zone *Zone) Records() []dns.RR {
 	return zone.records
 }

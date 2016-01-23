@@ -18,6 +18,18 @@ make
 ```
 
 ## Usage
+```
+$ realm --help
+usage: realm [--bind BIND] [ZONE [ZONE ...]]
+
+positional arguments:
+  zone                   DNS zone files to serve from this server
+
+options:
+  --bind BIND            [<host>]:<port> to bind too [default: :53]
+  --help, -h             display this help and exit
+```
+
 ### Zone file
 To run a server you must have a DNS [zone file](https://en.wikipedia.org/wiki/Zone_file).
 
@@ -47,17 +59,13 @@ Example taken from [here](https://en.wikipedia.org/wiki/Zone_file#File_format).
 
 ### Starting the server
 ```
-realm --zone ./domain.zone
+realm ./domain.zone
 ```
 
-By default `realm` binds to port `53`, which usually requires root, so you may need to run `sudo realm --zone ./domain.zone`.
+By default `realm` binds to port `53`, which usually requires root, so you may need to run `sudo realm ./domain.zone`.
 
-### Options
-* `--zone, -z` - the file file to load (e.g. `./domain.zone`), this argument is required
-    * You may instead specify the environment variable `REALM_ZONE="./domain.zone"`
-* `--bind, -b` - the `[<host>]:<port>` to bind the server to (e.g. `0.0.0.0:53`), default is `:53`
-    * You may instead specify the environment variable `REALM_BIND=":53"`
-* `--help, -h` - show help message
-* `--version, -v` - show version information
+You can also specify any number of zone files by providing multiple zone files.
 
-To see the latest command usage run `realm --help`.
+```
+realm ./first.domain.zone ./second.domain.zone
+```

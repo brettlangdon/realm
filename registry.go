@@ -2,8 +2,10 @@ package realm
 
 import "github.com/miekg/dns"
 
+// RecordsEntry is used to hold a mapping of DNS request types to DNS records
 type RecordsEntry map[uint16][]dns.RR
 
+// GetRecords will fetch the appropriate DNS records to the requested type
 func (entry RecordsEntry) GetRecords(rrType uint16) []dns.RR {
 	var records []dns.RR
 	records = make([]dns.RR, 0)
@@ -19,8 +21,10 @@ func (entry RecordsEntry) GetRecords(rrType uint16) []dns.RR {
 	return records
 }
 
+// DomainEntry is used to hold a mapping of DNS request classes to RecordEntrys
 type DomainEntry map[uint16]RecordsEntry
 
+// AddEntry is used to add a new DNS record to this mapping
 func (entry DomainEntry) AddEntry(record dns.RR) {
 	var header *dns.RR_Header
 	header = record.Header()
@@ -35,6 +39,7 @@ func (entry DomainEntry) AddEntry(record dns.RR) {
 	entry[header.Class][header.Rrtype] = append(entry[header.Class][header.Rrtype], record)
 }
 
+// GetEntries is used to find the appropriate RecordEntrys for the requested DNS class
 func (entry DomainEntry) GetEntries(rrClass uint16) []RecordsEntry {
 	var entries []RecordsEntry
 	entries = make([]RecordsEntry, 0)
@@ -50,16 +55,17 @@ func (entry DomainEntry) GetEntries(rrClass uint16) []RecordsEntry {
 	return entries
 }
 
-type Registry struct {
-	records map[string]DomainEntry
-}
+// Registry is a container for looking up DNS records for any request
+type Registry map[string]DomainEntry
 
+// NewRegistry will allocate and return a new *Registry
 func NewRegistry() *Registry {
 	return &Registry{
 		records: make(map[string]DomainEntry),
 	}
 }
 
+// addRecord is used to add a new DNS record to this registry
 func (r *Registry) addRecord(record dns.RR) {
 	var header *dns.RR_Header
 	header = record.Header()
@@ -84,6 +90,7 @@ func (r *Registry) addRecord(record dns.RR) {
 	}
 }
 
+// AddZone is used to add the records from a *Zone into this *Registry
 func (r *Registry) AddZone(z *Zone) {
 	for _, record := range z.Records() {
 		r.addRecord(record)

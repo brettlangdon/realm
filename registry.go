@@ -56,7 +56,9 @@ func (entry DomainEntry) GetEntries(rrClass uint16) []RecordsEntry {
 }
 
 // Registry is a container for looking up DNS records for any request
-type Registry map[string]DomainEntry
+type Registry struct {
+	records map[string]DomainEntry
+}
 
 // NewRegistry will allocate and return a new *Registry
 func NewRegistry() *Registry {

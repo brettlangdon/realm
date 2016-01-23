@@ -1,4 +1,4 @@
-realm: ./cmd/realm/main.go ./server.go ./zone.go
+realm: ./cmd/realm/main.go ./server.go ./zone.go ./registry.go
 	go build ./cmd/realm
 
 clean:

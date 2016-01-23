@@ -4,14 +4,14 @@ import "github.com/miekg/dns"
 
 // A Server listens for DNS requests over UDP and responds with answers from the provided Zone.
 type Server struct {
-	server *dns.Server
-	zone   *Zone
+	server   *dns.Server
+	registry *Registry
 }
 
 // NewServer returns a new initialized *Server that will bind to listen and will look up answers from zone.
-func NewServer(listen string, zone *Zone) *Server {
+func NewServer(listen string, registry *Registry) *Server {
 	var s *Server
-	s = &Server{zone: zone}
+	s = &Server{registry: registry}
 	s.server = &dns.Server{
 		Addr:    listen,
 		Net:     "udp",
@@ -37,7 +37,7 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
 	// Lookup answers to any of the questions
 	for _, question := range request.Question {
 		var records []dns.RR
-		records = s.zone.Lookup(question.Name, question.Qtype, question.Qclass)
+		records = s.registry.Lookup(question.Name, question.Qtype, question.Qclass)
 		response.Answer = append(response.Answer, records...)
 	}
 

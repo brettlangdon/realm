@@ -1,6 +1,10 @@
 package realm
 
-import "github.com/miekg/dns"
+import (
+	"strings"
+
+	"github.com/miekg/dns"
+)
 
 // RecordsEntry is used to hold a mapping of DNS request types to DNS records
 type RecordsEntry map[uint16][]dns.RR
@@ -74,6 +78,7 @@ func (r *Registry) addRecord(record dns.RR) {
 
 	var name string
 	name = dns.Fqdn(header.Name)
+	name = strings.ToLower(name)
 
 	if _, ok := r.records[name]; !ok {
 		r.records[name] = make(DomainEntry)
@@ -102,6 +107,8 @@ func (r *Registry) AddZone(z *Zone) {
 // Lookup will find all records which we should respond with for the given name, request type, and request class.
 func (r *Registry) Lookup(name string, reqType uint16, reqClass uint16) []dns.RR {
 	name = dns.Fqdn(name)
+	name = strings.ToLower(name)
+
 	var records []dns.RR
 	records = make([]dns.RR, 0)
 
@@ -131,7 +138,7 @@ func (r *Registry) Lookup(name string, reqType uint16, reqClass uint16) []dns.RR
 					var cname *dns.CNAME
 					cname = rr.(*dns.CNAME)
 					var cnameRecords []dns.RR
-					cnameRecords = r.Lookup(dns.Fqdn(cname.Target), reqType, reqClass)
+					cnameRecords = r.Lookup(cname.Target, reqType, reqClass)
 					records = append(records, cnameRecords...)
 				}
 

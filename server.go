@@ -44,10 +44,8 @@ func (s *Server) ListenAndServe() error {
 // It will attempt to provide answers to all questions from the configured zone.
 func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
 	// Capture starting time for measuring message response time
-	var start float64
-	var end float64
-	var elapsed float64
-	start = float64(time.Now().Unix()) * 1000.0
+	var start time.Time
+	start = time.Now()
 
 	// Setup the default response
 	var response *dns.Msg
@@ -58,33 +56,31 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
 	// Lookup answers to any of the questions
 	for _, question := range request.Question {
 		// Capture starting time for measuring lookup
-		var lookupStart float64
-		var lookupEnd float64
-		var lookupElapsed float64
-		lookupStart = float64(time.Now().Unix()) * 1000.0
+		var lookupStart time.Time
+		lookupStart = time.Now()
 
 		// Perform lookup for this question
 		var records []dns.RR
 		records = s.registry.Lookup(question.Name, question.Qtype, question.Qclass)
 
 		// Capture ending and elapsed time
-		lookupEnd = float64(time.Now().Unix()) * 1000.0
-		lookupElapsed = lookupEnd - lookupStart
+		var lookupElapsed time.Duration
+		lookupElapsed = time.Since(lookupStart)
 
 		// Append results to the response
 		response.Answer = append(response.Answer, records...)
 
 		// If StatsD is enabled, record some metrics
 		if s.statsd != nil {
-			s.statsd.TimeInMilliseconds("lookup.time", lookupElapsed, nil, 1)
-			s.statsd.Histogram("lookup.answer", float64(len(records)), nil, 1)
-
 			var tags []string
 			tags = []string{
 				fmt.Sprintf("name:%s", question.Name),
 				fmt.Sprintf("qtype:%s", dns.TypeToString[question.Qtype]),
 				fmt.Sprintf("qclass:%s", dns.ClassToString[question.Qclass]),
 			}
+
+			s.statsd.TimeInMilliseconds("lookup.time", lookupElapsed.Seconds()*1000.0, tags, 1)
+			s.statsd.Histogram("lookup.answer", float64(len(records)), tags, 1)
 			s.statsd.Count("request.question", 1, tags, 1)
 		}
 	}
@@ -93,9 +89,9 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
 	w.WriteMsg(response)
 
 	// Record any ending metrics
-	end = float64(time.Now().Unix()) * 1000.0
-	elapsed = end - start
 	if s.statsd != nil {
-		s.statsd.TimeInMilliseconds("request.time", elapsed, nil, 1)
+		var elapsed time.Duration
+		elapsed = time.Since(start)
+		s.statsd.TimeInMilliseconds("request.time", elapsed.Seconds()*1000.0, nil, 1)
 	}
 }

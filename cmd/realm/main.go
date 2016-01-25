@@ -9,8 +9,9 @@ import (
 )
 
 var args struct {
-	Zones []string `arg:"--zone,positional,help:DNS zone files to serve from this server"`
-	Bind  string   `arg:"help:[<host>]:<port> to bind too"`
+	Zones  []string `arg:"--zone,positional,help:DNS zone files to serve from this server"`
+	Bind   string   `arg:"help:[<host>]:<port> to bind too"`
+	StatsD string   `arg:"--statsd,help:<host>:<port> to send StatsD metrics to"`
 }
 
 func main() {
@@ -40,6 +41,12 @@ func main() {
 
 	// Create and start the server
 	log.Printf("starting the server on \"%s\"\n", args.Bind)
-	var server *realm.Server = realm.NewServer(args.Bind, registry)
+	var server *realm.Server
+	var err error
+	server, err = realm.NewServer(args.Bind, registry, args.StatsD)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log.Fatal(server.ListenAndServe())
 }

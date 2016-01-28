@@ -3,20 +3,27 @@ package main
 import (
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/alexflint/go-arg"
 	"github.com/brettlangdon/realm"
 )
 
 var args struct {
-	Zones  []string `arg:"--zone,positional,help:DNS zone files to serve from this server"`
-	Bind   string   `arg:"help:[<host>]:<port> to bind too"`
-	StatsD string   `arg:"--statsd,help:<host>:<port> to send StatsD metrics to"`
+	Zones   []string `arg:"--zone,positional,help:DNS zone files to serve from this server"`
+	Bind    string   `arg:"help:[<host>]:<port> to bind too"`
+	StatsD  string   `arg:"--statsd,help:<host>:<port> to send StatsD metrics to"`
+	Workers int      `arg:"--workers,help:number of workers to start [default: $GOMAXPROCS]`
 }
 
 func main() {
 	args.Bind = ":53"
 	argParser := arg.MustParse(&args)
+
+	// Control number of workers via GOMAXPROCS
+	if args.Workers > 0 {
+		runtime.GOMAXPROCS(args.Workers)
+	}
 
 	if len(args.Zones) == 0 {
 		log.Println("must supply at least 1 zone file to serve")

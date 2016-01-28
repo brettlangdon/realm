@@ -43,6 +43,16 @@ func (s *Server) ListenAndServe() error {
 // ServeDNS will be called for every DNS request to this server.
 // It will attempt to provide answers to all questions from the configured zone.
 func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
+	// Call `Hijack` since we will handle closing `dns.ResponseWriter` ourselves
+	w.Hijack()
+	// Handle the request
+	go s.handle(w, request)
+}
+
+func (s *Server) handle(w dns.ResponseWriter, request *dns.Msg) {
+	// Always close the writer
+	defer w.Close()
+
 	// Capture starting time for measuring message response time
 	var start time.Time
 	start = time.Now()

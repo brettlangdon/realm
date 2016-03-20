@@ -7,6 +7,7 @@ import (
 
 	"github.com/alexflint/go-arg"
 	"github.com/brettlangdon/realm"
+	"github.com/pkg/profile"
 )
 
 var args struct {
@@ -14,11 +15,22 @@ var args struct {
 	Bind    string   `arg:"help:[<host>]:<port> to bind too"`
 	StatsD  string   `arg:"--statsd,help:<host>:<port> to send StatsD metrics to"`
 	Workers int      `arg:"--workers,help:number of workers to start [default: $GOMAXPROCS]`
+	Profile string   `arg:"--profile,help:enable profiling for one of [cpu, mem, block]`
 }
 
 func main() {
 	args.Bind = ":53"
 	argParser := arg.MustParse(&args)
+
+	// Enable profiling
+	switch args.Profile {
+	case "cpu":
+		defer profile.Start(profile.CPUProfile).Stop()
+	case "mem":
+		defer profile.Start(profile.MemProfile).Stop()
+	case "block":
+		defer profile.Start(profile.BlockProfile).Stop()
+	}
 
 	// Control number of workers via GOMAXPROCS
 	if args.Workers > 0 {
